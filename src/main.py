@@ -67,6 +67,8 @@ def main():
                 name = get_clicked_button(buttons, event.pos)
                 if name:
                     print(f"button {name} clicked")
+                if name == "quit":
+                    running = False
         screen.blit(background, (0, 0))
         screen.blit(title, title_rect)
         for name, image, rect, mask in buttons:
