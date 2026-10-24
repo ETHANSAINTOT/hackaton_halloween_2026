@@ -17,7 +17,8 @@ RULES_TEXT = (
     "• Ghost: instant death, game over!\n"
     "\n"
     "You start with 5 lives, and the game ends when you have none left.\n"
-    "If your final score is among the 5 best ever, enter your nickname to join the leaderboard!"
+    "If your final score is among the 5 best ever, enter your nickname to join the leaderboard!\n"
+    "Any change to leaderboard.csv, other than by reaching the top 5, is strictly forbidden!"
 )
 
 
