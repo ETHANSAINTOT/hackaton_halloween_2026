@@ -12,6 +12,7 @@ from constants import TITLE, TITLE_FONT, TITLE_SIZE, TITLE_Y
 from constants import TITLE_COLOR, TITLE_OUTLINE_COLOR, TITLE_OUTLINE
 from ui import load_background, render_outlined_text, load_button, get_clicked_button
 from rules import run_rules
+from leaderboard_window import run_leaderboard
 
 
 def load_title():
@@ -47,6 +48,8 @@ def main():
                     running = False
                 elif name == "rules":
                     running = run_rules(screen)
+                elif name == "leaderboard":
+                    running = run_leaderboard(screen)
         screen.blit(background, (0, 0))
         screen.blit(title, title_rect)
         for name, image, rect, mask in buttons:
