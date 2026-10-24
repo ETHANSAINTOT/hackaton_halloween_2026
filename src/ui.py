@@ -12,6 +12,9 @@ from constants import WIDTH, HEIGHT, ASSETS_DIR, TEXT_FONT
 from constants import TITLE_FONT, TITLE_SIZE, TITLE_Y
 from constants import TITLE_COLOR, TITLE_OUTLINE_COLOR, TITLE_OUTLINE
 from constants import PANEL_COLOR, PANEL_WIDTH, PANEL_PADDING, BACK_BUTTON
+from constants import HOVER_SCALE, HOVER_BRIGHTEN, PRESSED_SCALE, PRESSED_DARKEN
+
+current_cursor = None
 
 
 def load_background():
@@ -33,19 +36,77 @@ def render_outlined_text(font, text, color, outline_color, outline):
     return surface.subsurface(surface.get_bounding_rect()).copy()
 
 
-def load_button(name, x, y, w, h):
-    image = pygame.image.load(os.path.join(ASSETS_DIR, "buttons", name + ".png")).convert_alpha()
-    image = pygame.transform.smoothscale(image, (w, h))
-    rect = image.get_rect(topleft=(x, y))
-    mask = pygame.mask.from_surface(image)
-    return name, image, rect, mask
+# Only change the cursor when needed, it is shared by every screen
+def set_cursor(cursor):
+    global current_cursor
+    if cursor != current_cursor:
+        pygame.mouse.set_cursor(cursor)
+        current_cursor = cursor
 
 
-def get_clicked_button(buttons, pos):
-    for name, image, rect, mask in buttons:
-        if rect.collidepoint(pos) and mask.get_at((pos[0] - rect.x, pos[1] - rect.y)):
-            return name
-    return None
+def scale_and_tint(image, w, h, color, flag):
+    result = pygame.transform.smoothscale(image, (round(w), round(h)))
+    result.fill(color, special_flags=flag)
+    return result
+
+
+class Button:
+    def __init__(self, name, x, y, w, h):
+        original = pygame.image.load(os.path.join(ASSETS_DIR, "buttons", name + ".png")).convert_alpha()
+        self.name = name
+        self.image = pygame.transform.smoothscale(original, (w, h))
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.mask = pygame.mask.from_surface(self.image)
+        # Effects are scaled from the original image to stay sharp
+        self.hover_image = scale_and_tint(original, w * HOVER_SCALE, h * HOVER_SCALE,
+                                          HOVER_BRIGHTEN, pygame.BLEND_RGB_ADD)
+        self.pressed_image = scale_and_tint(original, w * PRESSED_SCALE, h * PRESSED_SCALE,
+                                            PRESSED_DARKEN, pygame.BLEND_RGB_MULT)
+
+    # Pixel perfect: the transparent parts of the image are not part of the button
+    def collide(self, pos):
+        if not self.rect.collidepoint(pos):
+            return False
+        return self.mask.get_at((pos[0] - self.rect.x, pos[1] - self.rect.y))
+
+    def draw(self, screen, hovered, pressed):
+        if pressed:
+            image = self.pressed_image
+        elif hovered:
+            image = self.hover_image
+        else:
+            image = self.image
+        screen.blit(image, image.get_rect(center=self.rect.center))
+
+
+class ButtonGroup:
+    def __init__(self, buttons):
+        self.buttons = buttons
+        self.pressed = None
+
+    def get_button_at(self, pos):
+        for button in self.buttons:
+            if button.collide(pos):
+                return button.name
+        return None
+
+    # A click counts when the mouse is pressed and released on the same button
+    # Returns the name of the clicked button, or None
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            self.pressed = self.get_button_at(event.pos)
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            clicked = self.pressed if self.get_button_at(event.pos) == self.pressed else None
+            self.pressed = None
+            return clicked
+        return None
+
+    def draw(self, screen):
+        hovered = self.get_button_at(pygame.mouse.get_pos())
+        set_cursor(pygame.SYSTEM_CURSOR_HAND if hovered else pygame.SYSTEM_CURSOR_ARROW)
+        for button in self.buttons:
+            is_hovered = button.name == hovered
+            button.draw(screen, is_hovered, is_hovered and button.name == self.pressed)
 
 
 def wrap_text(font, text, max_width):
@@ -92,21 +153,20 @@ def run_text_screen(screen, title_text, lines, text_size):
     font = pygame.font.Font(TITLE_FONT, TITLE_SIZE)
     title = render_outlined_text(font, title_text, TITLE_COLOR, TITLE_OUTLINE_COLOR, TITLE_OUTLINE)
     title_rect = title.get_rect(midtop=(WIDTH // 2, TITLE_Y))
-    back_button = load_button(*BACK_BUTTON)
-    _, back_image, back_rect, _ = back_button
-    panel, panel_rect = load_panel(lines, text_size, title_rect.bottom, back_rect.top)
+    back_button = Button(*BACK_BUTTON)
+    buttons = ButtonGroup([back_button])
+    panel, panel_rect = load_panel(lines, text_size, title_rect.bottom, back_button.rect.top)
     clock = pygame.time.Clock()
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if get_clicked_button([back_button], event.pos):
-                    return True
+            if buttons.handle_event(event):
+                return True
         screen.blit(background, (0, 0))
         screen.blit(title, title_rect)
         screen.blit(panel, panel_rect)
-        screen.blit(back_image, back_rect)
+        buttons.draw(screen)
         pygame.display.flip()
         clock.tick(60)

@@ -10,7 +10,7 @@ import pygame
 from constants import WIDTH, HEIGHT, BUTTONS
 from constants import TITLE, TITLE_FONT, TITLE_SIZE, TITLE_Y
 from constants import TITLE_COLOR, TITLE_OUTLINE_COLOR, TITLE_OUTLINE
-from ui import load_background, render_outlined_text, load_button, get_clicked_button
+from ui import load_background, render_outlined_text, Button, ButtonGroup
 from rules import run_rules
 from leaderboard_window import run_leaderboard
 
@@ -23,7 +23,7 @@ def load_title():
 
 
 def load_buttons():
-    return [load_button(*button) for button in BUTTONS]
+    return ButtonGroup([Button(*button) for button in BUTTONS])
 
 
 def main():
@@ -40,20 +40,18 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                name = get_clicked_button(buttons, event.pos)
-                if name:
-                    print(f"button {name} clicked")
-                if name == "quit":
-                    running = False
-                elif name == "rules":
-                    running = run_rules(screen)
-                elif name == "leaderboard":
-                    running = run_leaderboard(screen)
+            name = buttons.handle_event(event)
+            if name:
+                print(f"button {name} clicked")
+            if name == "quit":
+                running = False
+            elif name == "rules":
+                running = run_rules(screen)
+            elif name == "leaderboard":
+                running = run_leaderboard(screen)
         screen.blit(background, (0, 0))
         screen.blit(title, title_rect)
-        for name, image, rect, mask in buttons:
-            screen.blit(image, rect)
+        buttons.draw(screen)
         pygame.display.flip()
         clock.tick(60)
     pygame.quit()

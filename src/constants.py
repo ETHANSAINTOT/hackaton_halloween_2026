@@ -30,6 +30,12 @@ TITLE_OUTLINE = 4
 TEXT_FONT = os.path.join(ASSETS_DIR, "font", "ARIAL.TTF")
 TEXT_COLOR = (240, 240, 240)
 
+# Button effects: hovered buttons grow and get brighter, pressed ones shrink and get darker
+HOVER_SCALE = 1.06
+HOVER_BRIGHTEN = (40, 40, 40)
+PRESSED_SCALE = 0.96
+PRESSED_DARKEN = (200, 200, 200)
+
 # Text screens (rules, leaderboard)
 PANEL_COLOR = (20, 10, 25, 190)
 PANEL_WIDTH = 1100
