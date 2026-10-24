@@ -13,8 +13,16 @@ ASSETS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ass
 
 # (name, x, y, width, height) in the 1280x720 window
 BUTTONS = [
-    ("play", 213, 85, 847, 338),
-    ("rules", 36, 486, 359, 171),
-    ("leaderboard", 442, 502, 396, 155),
-    ("quit", 896, 511, 347, 148),
+    ("play", 290, 165, 701, 280),
+    ("rules", 36, 496, 359, 171),
+    ("leaderboard", 442, 512, 396, 155),
+    ("quit", 896, 521, 347, 148),
 ]
+
+TITLE = "Pumpkin Scream"
+TITLE_FONT = os.path.join(ASSETS_DIR, "font", "bloody_ghost.otf")
+TITLE_SIZE = 110
+TITLE_Y = 25
+TITLE_COLOR = (255, 140, 0)
+TITLE_OUTLINE_COLOR = (30, 10, 20)
+TITLE_OUTLINE = 4
