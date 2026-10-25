@@ -80,6 +80,12 @@ SPAWN_DELAY_MIN = 0.5
 SPAWN_DELAY_MAX = 1.5
 FALL_SPEED_MIN = 150
 FALL_SPEED_MAX = 400
+# The game gets harder as the score grows: one level per SCORE_PER_LEVEL points,
+# each level shortens the spawn delay and speeds up the fall
+SCORE_PER_LEVEL = 10
+MAX_LEVEL = 10
+SPAWN_DELAY_STEP = 0.1
+FALL_SPEED_STEP = 40
 # Same ratio as the image (453x193), in the top right corner
 GAME_QUIT_BUTTON = ("quit", 1085, 15, 180, 77)
 GAME_OVER_PLAY_BUTTON = ("play", WIDTH // 2 - 90, HEIGHT - 120, 180, 77)

@@ -12,12 +12,22 @@ import os
 from constants import WIDTH, HEIGHT, ASSETS_DIR, GROUND_Y, GOOD_SOUND, PAIN_SOUND
 from constants import SCREAMER_SIZE, SCREAMER_SPEED, OBJECT_SIZE, FALLING_OBJECTS, SCREAMER_HEALTH
 from constants import SPAWN_DELAY_MIN, SPAWN_DELAY_MAX, FALL_SPEED_MIN, FALL_SPEED_MAX
+from constants import SCORE_PER_LEVEL, MAX_LEVEL, SPAWN_DELAY_STEP, FALL_SPEED_STEP
 from constants import GAME_QUIT_BUTTON, TOOLTIP_TEXT_SIZE, GAME_MUSIC, SCREAM_SOUND, GAME_OVER_PLAY_BUTTON
 from constants import TEXT_FONT, TEXT_COLOR, PANEL_COLOR, TITLE_COLOR, TITLE_OUTLINE_COLOR
 from ui import load_background, Button, ButtonGroup, render_tooltip, render_outlined_text, play_music, play_sound
 from leaderboard_window import qualifies, save_score
 
 QUIT_WARNING = "You will go back to the main menu and lose all your progress!"
+
+
+def current_level(score):
+    return min(score // SCORE_PER_LEVEL + 1, MAX_LEVEL)
+
+
+def spawn_delay(level):
+    factor = max(0.3, 1 - SPAWN_DELAY_STEP * (level - 1))
+    return random.uniform(SPAWN_DELAY_MIN, SPAWN_DELAY_MAX) * factor
 
 
 def load_sprite(filename, size, smooth):
@@ -65,7 +75,7 @@ class Screamer:
 
 
 class FallingObject:
-    def __init__(self, kind, image, damage):
+    def __init__(self, kind, image, damage, level):
         self.destroyed = False
         self.kind = kind
         self.damage = damage
@@ -74,7 +84,10 @@ class FallingObject:
         self.x = random.randint(0, WIDTH - OBJECT_SIZE)
         self.rect = image.get_rect(bottomleft=(self.x, 0))
         self.y = float(self.rect.y)
-        self.speed = random.uniform(FALL_SPEED_MIN, FALL_SPEED_MAX)
+        self.speed = random.uniform(
+            FALL_SPEED_MIN + FALL_SPEED_STEP * (level - 1),
+            FALL_SPEED_MAX + FALL_SPEED_STEP * (level - 1)
+        )
     def get_damage(self):
         return self.damage
     def update(self, dt):
@@ -91,7 +104,7 @@ class FallingObject:
         screen.blit(self.image, self.rect)
 
 
-def spawn_object(sprites):
+def spawn_object(sprites, level):
     weights = [
         random.randint(weight[0], weight[1])
         for kind, filename, weight, damage in FALLING_OBJECTS
@@ -101,9 +114,9 @@ def spawn_object(sprites):
         weights=weights,
         k=1
     )[0]
-    return FallingObject(kind, sprites[kind], damage)
+    return FallingObject(kind, sprites[kind], damage, level)
 
-def draw_stats(screen, screamer):
+def draw_stats(screen, screamer, level):
     font = pygame.font.Font(None, 32)
 
     health_text = font.render(
@@ -116,9 +129,15 @@ def draw_stats(screen, screamer):
         True,
         (255, 255, 255)
     )
+    level_text = font.render(
+        f"Level : {level}",
+        True,
+        (255, 255, 255)
+    )
 
     screen.blit(health_text, (10, 10))
     screen.blit(score_text, (10, 45))
+    screen.blit(level_text, (10, 80))
 
 # End of the game: shows the final score, and asks for a nickname
 # when the score makes the top 5
@@ -204,7 +223,7 @@ def run_game(screen):
                 False
             )
         objects = []
-        spawn_timer = random.uniform(SPAWN_DELAY_MIN, SPAWN_DELAY_MAX)
+        spawn_timer = spawn_delay(1)
         quit_button = Button(*GAME_QUIT_BUTTON)
         buttons = ButtonGroup([quit_button])
         tooltip = render_tooltip(QUIT_WARNING, TOOLTIP_TEXT_SIZE)
@@ -222,14 +241,12 @@ def run_game(screen):
                     return True
                 if buttons.handle_event(event):
                     return True
+            level = current_level(screamer.score)
             screamer.update(dt, objects)
             spawn_timer -= dt
             if spawn_timer <= 0:
-                objects.append(spawn_object(sprites))
-                spawn_timer += random.uniform(
-                    SPAWN_DELAY_MIN,
-                    SPAWN_DELAY_MAX
-                )
+                objects.append(spawn_object(sprites, level))
+                spawn_timer += spawn_delay(level)
             for obj in objects:
                 obj.update(dt)
             objects = [
@@ -241,7 +258,7 @@ def run_game(screen):
             for obj in objects:
                 obj.draw(screen)
             buttons.draw(screen)
-            draw_stats(screen, screamer)
+            draw_stats(screen, screamer, level)
             if buttons.get_button_at(pygame.mouse.get_pos()):
                 screen.blit(tooltip, tooltip_rect)
             pygame.display.flip()
