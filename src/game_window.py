@@ -12,7 +12,10 @@ import os
 from constants import WIDTH, ASSETS_DIR, GROUND_Y
 from constants import SCREAMER_SIZE, SCREAMER_SPEED, OBJECT_SIZE, FALLING_OBJECTS
 from constants import SPAWN_DELAY_MIN, SPAWN_DELAY_MAX, FALL_SPEED_MIN, FALL_SPEED_MAX
-from ui import load_background, set_cursor
+from constants import GAME_QUIT_BUTTON, TOOLTIP_TEXT_SIZE
+from ui import load_background, Button, ButtonGroup, render_tooltip
+
+QUIT_WARNING = "You will go back to the main menu and lose all your progress!"
 
 
 def load_sprite(filename, size, smooth):
@@ -68,7 +71,7 @@ def spawn_object(sprites):
     return FallingObject(kind, sprites[kind])
 
 
-# Returns True to go back to the menu (Escape), False if the window was closed
+# Returns True to go back to the menu (Escape or quit button), False if the window was closed
 def run_game(screen):
     background = load_background()
     screamer = Screamer()
@@ -77,7 +80,11 @@ def run_game(screen):
         sprites[kind] = load_sprite(filename, (OBJECT_SIZE, OBJECT_SIZE), False)
     objects = []
     spawn_timer = random.uniform(SPAWN_DELAY_MIN, SPAWN_DELAY_MAX)
-    set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+    quit_button = Button(*GAME_QUIT_BUTTON)
+    buttons = ButtonGroup([quit_button])
+    # The warning is shown under the quit button while it is hovered
+    tooltip = render_tooltip(QUIT_WARNING, TOOLTIP_TEXT_SIZE)
+    tooltip_rect = tooltip.get_rect(topright=(quit_button.rect.right, quit_button.rect.bottom + 8))
     clock = pygame.time.Clock()
 
     while True:
@@ -87,6 +94,8 @@ def run_game(screen):
             if event.type == pygame.QUIT:
                 return False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                return True
+            if buttons.handle_event(event):
                 return True
         screamer.update(dt)
         spawn_timer -= dt
@@ -100,4 +109,7 @@ def run_game(screen):
         screamer.draw(screen)
         for obj in objects:
             obj.draw(screen)
+        buttons.draw(screen)
+        if buttons.get_button_at(pygame.mouse.get_pos()):
+            screen.blit(tooltip, tooltip_rect)
         pygame.display.flip()

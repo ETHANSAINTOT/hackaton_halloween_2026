@@ -70,3 +70,6 @@ SPAWN_DELAY_MIN = 0.5
 SPAWN_DELAY_MAX = 1.5
 FALL_SPEED_MIN = 150
 FALL_SPEED_MAX = 400
+# Same ratio as the image (453x193), in the top right corner
+GAME_QUIT_BUTTON = ("quit", 1085, 15, 180, 77)
+TOOLTIP_TEXT_SIZE = 20

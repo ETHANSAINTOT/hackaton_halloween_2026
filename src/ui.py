@@ -8,7 +8,7 @@
 import pygame
 import os
 
-from constants import WIDTH, HEIGHT, ASSETS_DIR, TEXT_FONT
+from constants import WIDTH, HEIGHT, ASSETS_DIR, TEXT_FONT, TEXT_COLOR
 from constants import TITLE_FONT, TITLE_SIZE, TITLE_Y
 from constants import TITLE_COLOR, TITLE_OUTLINE_COLOR, TITLE_OUTLINE
 from constants import PANEL_COLOR, PANEL_WIDTH, PANEL_PADDING, BACK_BUTTON
@@ -144,6 +144,19 @@ def load_panel(lines, text_size, top, bottom):
     # Centered between the title and the back button
     rect = panel.get_rect(center=(WIDTH // 2, (top + bottom) // 2))
     return panel, rect
+
+
+# Small text box with the same look as the panels
+def render_tooltip(text, text_size):
+    font = pygame.font.Font(TEXT_FONT, text_size)
+    label = font.render(text, True, TEXT_COLOR)
+    padding = text_size // 2
+    size = (label.get_width() + 2 * padding, label.get_height() + 2 * padding)
+    tooltip = pygame.Surface(size, pygame.SRCALPHA)
+    pygame.draw.rect(tooltip, PANEL_COLOR, tooltip.get_rect(), border_radius=10)
+    pygame.draw.rect(tooltip, TITLE_COLOR, tooltip.get_rect(), width=2, border_radius=10)
+    tooltip.blit(label, (padding, padding))
+    return tooltip
 
 
 # Screen with a title, a text panel and a back button
