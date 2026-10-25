@@ -247,6 +247,19 @@ def run_game(screen):
         )
         play_music(GAME_MUSIC)
         clock = pygame.time.Clock()
+        paused = False
+        pause_label = render_outlined_text(
+            pygame.font.Font(TEXT_FONT, 60),
+            "Paused",
+            TEXT_COLOR,
+            TITLE_OUTLINE_COLOR,
+            4
+        )
+        pause_hint = pygame.font.Font(TEXT_FONT, 24).render(
+            "Press P to resume",
+            True,
+            TEXT_COLOR
+        )
         while screamer.health > 0:
             dt = min(clock.tick(60) / 1000, 0.05)
             for event in pygame.event.get():
@@ -256,18 +269,21 @@ def run_game(screen):
                     return True
                 if buttons.handle_event(event):
                     return True
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                    paused = not paused
             level = current_level(screamer.score)
-            screamer.update(dt, objects)
-            spawn_timer -= dt
-            if spawn_timer <= 0:
-                objects.append(spawn_object(sprites, level))
-                spawn_timer += spawn_delay(level)
-            for obj in objects:
-                obj.update(dt)
-            objects = [
-                obj for obj in objects
-                if not obj.on_ground() and not obj.on_destroy()
-            ]
+            if not paused:
+                screamer.update(dt, objects)
+                spawn_timer -= dt
+                if spawn_timer <= 0:
+                    objects.append(spawn_object(sprites, level))
+                    spawn_timer += spawn_delay(level)
+                for obj in objects:
+                    obj.update(dt)
+                objects = [
+                    obj for obj in objects
+                    if not obj.on_ground() and not obj.on_destroy()
+                ]
             screen.blit(background, (0, 0))
             screamer.draw(screen)
             for obj in objects:
@@ -276,6 +292,18 @@ def run_game(screen):
             draw_stats(screen, screamer, level)
             if buttons.get_button_at(pygame.mouse.get_pos()):
                 screen.blit(tooltip, tooltip_rect)
+            if paused:
+                overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+                overlay.fill((0, 0, 0, 130))
+                screen.blit(overlay, (0, 0))
+                screen.blit(
+                    pause_label,
+                    pause_label.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 20))
+                )
+                screen.blit(
+                    pause_hint,
+                    pause_hint.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40))
+                )
             pygame.display.flip()
         result = show_game_over(screen, screamer.score)
         if result is True:
