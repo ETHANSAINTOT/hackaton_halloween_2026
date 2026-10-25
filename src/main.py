@@ -13,6 +13,7 @@ from constants import TITLE_COLOR, TITLE_OUTLINE_COLOR, TITLE_OUTLINE
 from ui import load_background, render_outlined_text, Button, ButtonGroup
 from rules import run_rules
 from leaderboard_window import run_leaderboard
+from game_window import run_game
 
 
 def load_title():
@@ -45,6 +46,8 @@ def main():
                 print(f"button {name} clicked")
             if name == "quit":
                 running = False
+            elif name == "play":
+                running = run_game(screen)
             elif name == "rules":
                 running = run_rules(screen)
             elif name == "leaderboard":

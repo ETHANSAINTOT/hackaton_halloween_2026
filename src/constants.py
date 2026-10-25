@@ -53,3 +53,20 @@ LEADERBOARD_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lea
 LEADERBOARD_SIZE = 5
 # Gold, silver, bronze
 PODIUM_COLORS = [(255, 215, 0), (192, 192, 192), (205, 127, 50)]
+
+# Game screen
+GROUND_Y = HEIGHT - 20
+SCREAMER_SIZE = (120, 180)
+# Speeds are in pixels per second, delays in seconds
+SCREAMER_SPEED = 600
+OBJECT_SIZE = 64
+# (kind, image, weight): the bigger the weight, the more often the object falls
+FALLING_OBJECTS = [
+    ("pumpkin", "pumpkin.png", 6),
+    ("pumpkin_carved", "pumpkin_carved.png", 3),
+    ("boo", "boo.png", 1),
+]
+SPAWN_DELAY_MIN = 0.5
+SPAWN_DELAY_MAX = 1.5
+FALL_SPEED_MIN = 150
+FALL_SPEED_MAX = 400
