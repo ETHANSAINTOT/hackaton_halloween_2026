@@ -13,7 +13,9 @@ from constants import WIDTH, HEIGHT, ASSETS_DIR, GROUND_Y, GOOD_SOUND, PAIN_SOUN
 from constants import SCREAMER_SIZE, SCREAMER_SPEED, OBJECT_SIZE, FALLING_OBJECTS, SCREAMER_HEALTH
 from constants import SPAWN_DELAY_MIN, SPAWN_DELAY_MAX, FALL_SPEED_MIN, FALL_SPEED_MAX
 from constants import GAME_QUIT_BUTTON, TOOLTIP_TEXT_SIZE, GAME_MUSIC, SCREAM_SOUND, GAME_OVER_PLAY_BUTTON
-from ui import load_background, Button, ButtonGroup, render_tooltip, play_music, play_sound
+from constants import TEXT_FONT, TEXT_COLOR, PANEL_COLOR, TITLE_COLOR, TITLE_OUTLINE_COLOR
+from ui import load_background, Button, ButtonGroup, render_tooltip, render_outlined_text, play_music, play_sound
+from leaderboard_window import qualifies, save_score
 
 QUIT_WARNING = "You will go back to the main menu and lose all your progress!"
 
@@ -118,14 +120,41 @@ def draw_stats(screen, screamer):
     screen.blit(health_text, (10, 10))
     screen.blit(score_text, (10, 45))
 
-def show_game_over(screen):
+# End of the game: shows the final score, and asks for a nickname
+# when the score makes the top 5
+# Returns True for a new game, None for the menu, False if the window was closed
+def show_game_over(screen, score):
     image = load_sprite("true_screamer.png", (1920, 1080), True)
     image_rect = image.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 80))
 
     play_button = Button(*GAME_OVER_PLAY_BUTTON)
     buttons = ButtonGroup([play_button])
-
     clock = pygame.time.Clock()
+
+    score_font = pygame.font.Font(TEXT_FONT, 44)
+    # Outlined so it stays readable over the light part of the image
+    score_label = render_outlined_text(
+        score_font, f"Score : {score}", TEXT_COLOR, TITLE_OUTLINE_COLOR, 3
+    )
+    score_rect = score_label.get_rect(midtop=(WIDTH // 2, 40))
+
+    entering = qualifies(score)
+    nickname = ""
+    nick_font = pygame.font.Font(TEXT_FONT, 32)
+    box_rect = pygame.Rect(0, 0, 420, 48)
+    box_rect.midbottom = (WIDTH // 2, 520)
+    prompt = pygame.font.Font(TEXT_FONT, 28).render(
+        "You made the top 5 ! Enter your nickname :",
+        True,
+        (255, 215, 0)
+    )
+    prompt_rect = prompt.get_rect(midbottom=(box_rect.x, box_rect.top - 10))
+    hint = pygame.font.Font(TEXT_FONT, 20).render(
+        "Enter to save - Escape for the menu",
+        True,
+        TEXT_COLOR
+    )
+    hint_rect = hint.get_rect(midtop=(WIDTH // 2, box_rect.bottom + 8))
 
     while True:
         clock.tick(60)
@@ -137,9 +166,28 @@ def show_game_over(screen):
                 return None
             if buttons.handle_event(event):
                 return True
+            if entering and event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    name = nickname.strip()
+                    if name:
+                        save_score(name, score)
+                    return None
+                if event.key == pygame.K_BACKSPACE:
+                    nickname = nickname[:-1]
+                elif event.unicode and event.unicode.isprintable() and len(nickname) < 16:
+                    nickname += event.unicode
 
         screen.fill((0, 0, 0))
         screen.blit(image, image_rect)
+        screen.blit(score_label, score_rect)
+        if entering:
+            screen.blit(prompt, prompt_rect)
+            pygame.draw.rect(screen, PANEL_COLOR, box_rect, border_radius=10)
+            pygame.draw.rect(screen, TITLE_COLOR, box_rect, width=2, border_radius=10)
+            cursor = ">" if (pygame.time.get_ticks() // 400) % 2 == 0 else ""
+            label = nick_font.render(nickname + cursor, True, TEXT_COLOR)
+            screen.blit(label, (box_rect.x + 12, box_rect.y + 8))
+            screen.blit(hint, hint_rect)
         buttons.draw(screen)
         pygame.display.flip()
 
@@ -197,7 +245,7 @@ def run_game(screen):
             if buttons.get_button_at(pygame.mouse.get_pos()):
                 screen.blit(tooltip, tooltip_rect)
             pygame.display.flip()
-        result = show_game_over(screen)
+        result = show_game_over(screen, screamer.score)
         if result is True:
             continue  # Nouvelle partie : tout est réinitialisé.
         if result is False:

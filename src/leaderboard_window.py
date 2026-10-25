@@ -21,6 +21,33 @@ def load_leaderboard():
         return []
 
 
+# Returns True if the score would get into the top 5
+def qualifies(score):
+    scores = [
+        int(points)
+        for _, points in load_leaderboard()
+        if points.isdigit()
+    ]
+    if len(scores) < LEADERBOARD_SIZE:
+        return True
+    return score > min(scores)
+
+
+# Adds the new entry, keeps only the top 5, and rewrites the file
+def save_score(nickname, score):
+    entries = [
+        (name, int(points))
+        for name, points in load_leaderboard()
+        if points.isdigit()
+    ]
+    entries.append((nickname, int(score)))
+    entries.sort(key=lambda entry: entry[1], reverse=True)
+    with open(LEADERBOARD_FILE, "w", newline="", encoding="utf-8") as file:
+        file.write("nickname;score\n")
+        for name, points in entries[:LEADERBOARD_SIZE]:
+            file.write(f"{name};{points}\n")
+
+
 # Returns True to go back to the menu, False if the window was closed
 def run_leaderboard(screen):
     entries = load_leaderboard()
