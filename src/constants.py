@@ -31,6 +31,7 @@ TITLE_OUTLINE = 4
 MENU_MUSIC = os.path.join(ASSETS_DIR, "music", "spooky_halloween.mp3")
 GAME_MUSIC = os.path.join(ASSETS_DIR, "music", "spooky_scary_skeleton.mp3")
 SCREAM_SOUND = os.path.join(ASSETS_DIR, "music", "scream.mp3")
+GOOD_SOUND = os.path.join(ASSETS_DIR, "music", "good.mp3")
 # Between 0.0 (mute) and 1.0 (max)
 MUSIC_VOLUME = 0.5
 

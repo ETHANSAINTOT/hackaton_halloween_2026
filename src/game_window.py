@@ -9,7 +9,7 @@ import pygame
 import random
 import os
 
-from constants import WIDTH, HEIGHT, ASSETS_DIR, GROUND_Y
+from constants import WIDTH, HEIGHT, ASSETS_DIR, GROUND_Y, GOOD_SOUND
 from constants import SCREAMER_SIZE, SCREAMER_SPEED, OBJECT_SIZE, FALLING_OBJECTS, SCREAMER_HEALTH
 from constants import SPAWN_DELAY_MIN, SPAWN_DELAY_MAX, FALL_SPEED_MIN, FALL_SPEED_MAX
 from constants import GAME_QUIT_BUTTON, TOOLTIP_TEXT_SIZE, GAME_MUSIC, SCREAM_SOUND, GAME_OVER_PLAY_BUTTON
@@ -50,6 +50,7 @@ class Screamer:
             damage = obj.get_damage()
             if (damage == 0):
                 self.score += 1
+                play_sound(GOOD_SOUND)
             else:
                 self.health = max(0, self.health - damage)
                 if self.health == 0:
