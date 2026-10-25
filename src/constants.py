@@ -70,11 +70,13 @@ SCREAMER_SIZE = (120, 180)
 SCREAMER_SPEED = 600
 SCREAMER_HEALTH = 5
 OBJECT_SIZE = 64
-# (kind, image, weight, damage): the bigger the weight, the more often the object falls
+# (kind, image, weight, damage, score): the bigger the weight, the more often the object falls
 FALLING_OBJECTS = [
-    ("pumpkin", "pumpkin.png", (3, 6) , 0),
-    ("pumpkin_carved", "pumpkin_carved.png", (1, 3), 1),
-    ("boo", "boo.png", (1, 2), 5),
+    ("pumpkin", "pumpkin.png", (3, 6), 0, 1),
+    ("pumpkin_carved", "pumpkin_carved.png", (1, 3), 1, 0),
+    ("boo", "boo.png", (1, 2), 5, 0),
+    # Rare and worth 3 points, safe to catch
+    ("candy", "candy.png", (0, 1), 0, 3),
 ]
 SPAWN_DELAY_MIN = 0.5
 SPAWN_DELAY_MAX = 1.5

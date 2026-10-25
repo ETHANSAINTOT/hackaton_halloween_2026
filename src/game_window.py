@@ -61,7 +61,7 @@ class Screamer:
             obj.set_destroy()
             damage = obj.get_damage()
             if (damage == 0):
-                self.score += 1
+                self.score += obj.get_score()
                 play_sound(GOOD_SOUND)
             else:
                 self.health = max(0, self.health - damage)
@@ -75,10 +75,11 @@ class Screamer:
 
 
 class FallingObject:
-    def __init__(self, kind, image, damage, level):
+    def __init__(self, kind, image, damage, score, level):
         self.destroyed = False
         self.kind = kind
         self.damage = damage
+        self.score = score
         self.image = image
         # Starts just above the top edge of the window
         self.x = random.randint(0, WIDTH - OBJECT_SIZE)
@@ -90,6 +91,8 @@ class FallingObject:
         )
     def get_damage(self):
         return self.damage
+    def get_score(self):
+        return self.score
     def update(self, dt):
         self.y += self.speed * dt
         self.rect.y = round(self.y)
@@ -107,14 +110,14 @@ class FallingObject:
 def spawn_object(sprites, level):
     weights = [
         random.randint(weight[0], weight[1])
-        for kind, filename, weight, damage in FALLING_OBJECTS
+        for kind, filename, weight, damage, score in FALLING_OBJECTS
     ]
-    kind, filename, weight, damage = random.choices(
+    kind, filename, weight, damage, score = random.choices(
         FALLING_OBJECTS,
         weights=weights,
         k=1
     )[0]
-    return FallingObject(kind, sprites[kind], damage, level)
+    return FallingObject(kind, sprites[kind], damage, score, level)
 
 def draw_stats(screen, screamer, level):
     font = pygame.font.Font(None, 32)
@@ -216,7 +219,7 @@ def run_game(screen):
         background = load_background()
         screamer = Screamer()
         sprites = {}
-        for kind, filename, weight, damage in FALLING_OBJECTS:
+        for kind, filename, weight, damage, score in FALLING_OBJECTS:
             sprites[kind] = load_sprite(
                 filename,
                 (OBJECT_SIZE, OBJECT_SIZE),

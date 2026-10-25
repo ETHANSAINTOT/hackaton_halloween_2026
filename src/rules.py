@@ -15,6 +15,7 @@ RULES_TEXT = (
     "• Classic pumpkin: catch as many as you can to raise your score.\n"
     "• Carved pumpkin: you lose a life.\n"
     "• Ghost: instant death, game over!\n"
+    "• Candy: very rare, worth 3 points.\n"
     "\n"
     "You start with 5 lives, and the game ends when you have none left.\n"
     "If your final score is among the 5 best ever, enter your nickname to join the leaderboard!\n"
