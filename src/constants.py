@@ -72,9 +72,9 @@ SCREAMER_HEALTH = 5
 OBJECT_SIZE = 64
 # (kind, image, weight, damage): the bigger the weight, the more often the object falls
 FALLING_OBJECTS = [
-    ("pumpkin", "pumpkin.png", 6 , 0),
-    ("pumpkin_carved", "pumpkin_carved.png", 3, 1),
-    ("boo", "boo.png", 1, 5),
+    ("pumpkin", "pumpkin.png", (3, 6) , 0),
+    ("pumpkin_carved", "pumpkin_carved.png", (1, 3), 1),
+    ("boo", "boo.png", (1, 2), 5),
 ]
 SPAWN_DELAY_MIN = 0.5
 SPAWN_DELAY_MAX = 1.5

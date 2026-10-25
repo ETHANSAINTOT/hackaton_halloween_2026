@@ -90,9 +90,13 @@ class FallingObject:
 
 
 def spawn_object(sprites):
+    weights = [
+        random.randint(weight[0], weight[1])
+        for kind, filename, weight, damage in FALLING_OBJECTS
+    ]
     kind, filename, weight, damage = random.choices(
         FALLING_OBJECTS,
-        weights=[weight for kind, filename, weight, damage in FALLING_OBJECTS],
+        weights=weights,
         k=1
     )[0]
     return FallingObject(kind, sprites[kind], damage)
