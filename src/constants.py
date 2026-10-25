@@ -27,6 +27,12 @@ TITLE_COLOR = (255, 140, 0)
 TITLE_OUTLINE_COLOR = (30, 10, 20)
 TITLE_OUTLINE = 4
 
+# Menu music is played on the main menu, rules and leaderboard, game music during the game
+MENU_MUSIC = os.path.join(ASSETS_DIR, "music", "spooky_halloween.mp3")
+GAME_MUSIC = os.path.join(ASSETS_DIR, "music", "spooky_scary_skeleton.mp3")
+# Between 0.0 (mute) and 1.0 (max)
+MUSIC_VOLUME = 0.5
+
 TEXT_FONT = os.path.join(ASSETS_DIR, "font", "ARIAL.TTF")
 TEXT_COLOR = (240, 240, 240)
 

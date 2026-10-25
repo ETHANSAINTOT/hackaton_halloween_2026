@@ -10,7 +10,8 @@ import pygame
 from constants import WIDTH, HEIGHT, BUTTONS
 from constants import TITLE, TITLE_FONT, TITLE_SIZE, TITLE_Y
 from constants import TITLE_COLOR, TITLE_OUTLINE_COLOR, TITLE_OUTLINE
-from ui import load_background, render_outlined_text, Button, ButtonGroup
+from constants import MENU_MUSIC
+from ui import load_background, render_outlined_text, Button, ButtonGroup, play_music
 from rules import run_rules
 from leaderboard_window import run_leaderboard
 from game_window import run_game
@@ -31,6 +32,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption(TITLE)
+    play_music(MENU_MUSIC)
     background = load_background()
     title, title_rect = load_title()
     buttons = load_buttons()
@@ -48,6 +50,7 @@ def main():
                 running = False
             elif name == "play":
                 running = run_game(screen)
+                play_music(MENU_MUSIC)
             elif name == "rules":
                 running = run_rules(screen)
             elif name == "leaderboard":

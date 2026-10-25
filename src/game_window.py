@@ -12,8 +12,8 @@ import os
 from constants import WIDTH, ASSETS_DIR, GROUND_Y
 from constants import SCREAMER_SIZE, SCREAMER_SPEED, OBJECT_SIZE, FALLING_OBJECTS
 from constants import SPAWN_DELAY_MIN, SPAWN_DELAY_MAX, FALL_SPEED_MIN, FALL_SPEED_MAX
-from constants import GAME_QUIT_BUTTON, TOOLTIP_TEXT_SIZE
-from ui import load_background, Button, ButtonGroup, render_tooltip
+from constants import GAME_QUIT_BUTTON, TOOLTIP_TEXT_SIZE, GAME_MUSIC
+from ui import load_background, Button, ButtonGroup, render_tooltip, play_music
 
 QUIT_WARNING = "You will go back to the main menu and lose all your progress!"
 
@@ -85,6 +85,7 @@ def run_game(screen):
     # The warning is shown under the quit button while it is hovered
     tooltip = render_tooltip(QUIT_WARNING, TOOLTIP_TEXT_SIZE)
     tooltip_rect = tooltip.get_rect(topright=(quit_button.rect.right, quit_button.rect.bottom + 8))
+    play_music(GAME_MUSIC)
     clock = pygame.time.Clock()
 
     while True:

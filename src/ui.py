@@ -13,6 +13,7 @@ from constants import TITLE_FONT, TITLE_SIZE, TITLE_Y
 from constants import TITLE_COLOR, TITLE_OUTLINE_COLOR, TITLE_OUTLINE
 from constants import PANEL_COLOR, PANEL_WIDTH, PANEL_PADDING, BACK_BUTTON
 from constants import HOVER_SCALE, HOVER_BRIGHTEN, PRESSED_SCALE, PRESSED_DARKEN
+from constants import MUSIC_VOLUME
 
 current_cursor = None
 
@@ -34,6 +35,16 @@ def render_outlined_text(font, text, color, outline_color, outline):
     surface.blit(front, (o, o))
     # Crop the empty space around the letters so the centering is exact
     return surface.subsurface(surface.get_bounding_rect()).copy()
+
+
+# Replaces the current music and plays it in loop, the game still works without sound
+def play_music(path):
+    try:
+        pygame.mixer.music.load(path)
+        pygame.mixer.music.set_volume(MUSIC_VOLUME)
+        pygame.mixer.music.play(-1)
+    except pygame.error as error:
+        print(f"Cannot play the music: {error}")
 
 
 # Only change the cursor when needed, it is shared by every screen
