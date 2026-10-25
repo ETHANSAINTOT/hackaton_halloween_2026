@@ -77,7 +77,11 @@ FALLING_OBJECTS = [
     ("boo", "boo.png", (1, 2), 5, 0),
     # Rare and worth 3 points, safe to catch
     ("candy", "candy.png", (0, 1), 0, 3),
+    # Very rare, gives POTION_DURATION seconds of invincibility
+    ("potion", "potion.png", (0, 1), 0, 0),
 ]
+# Seconds of invincibility given by the potion
+POTION_DURATION = 3.0
 SPAWN_DELAY_MIN = 0.5
 SPAWN_DELAY_MAX = 1.5
 FALL_SPEED_MIN = 150

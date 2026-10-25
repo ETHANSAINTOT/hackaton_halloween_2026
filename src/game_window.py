@@ -13,6 +13,7 @@ from constants import WIDTH, HEIGHT, ASSETS_DIR, GROUND_Y, GOOD_SOUND, PAIN_SOUN
 from constants import SCREAMER_SIZE, SCREAMER_SPEED, OBJECT_SIZE, FALLING_OBJECTS, SCREAMER_HEALTH
 from constants import SPAWN_DELAY_MIN, SPAWN_DELAY_MAX, FALL_SPEED_MIN, FALL_SPEED_MAX
 from constants import SCORE_PER_LEVEL, MAX_LEVEL, SPAWN_DELAY_STEP, FALL_SPEED_STEP
+from constants import POTION_DURATION
 from constants import GAME_QUIT_BUTTON, TOOLTIP_TEXT_SIZE, GAME_MUSIC, SCREAM_SOUND, GAME_OVER_PLAY_BUTTON
 from constants import TEXT_FONT, TEXT_COLOR, PANEL_COLOR, TITLE_COLOR, TITLE_OUTLINE_COLOR
 from ui import load_background, Button, ButtonGroup, render_tooltip, render_outlined_text, play_music, play_sound
@@ -42,10 +43,14 @@ class Screamer:
     def __init__(self):
         self.health = SCREAMER_HEALTH
         self.image = load_sprite("screamer.png", SCREAMER_SIZE, True)
+        # Blue tinted copy drawn while the potion effect is active
+        self.shield_image = self.image.copy()
+        self.shield_image.fill((90, 170, 255), special_flags=pygame.BLEND_RGB_ADD)
         self.rect = self.image.get_rect(midbottom=(WIDTH // 2, GROUND_Y))
         self.x = float(self.rect.x)
         self.y = float(self.rect.y)
         self.score = 0
+        self.shield_time = 0.0
 
     def update(self, dt, objs):
         keys = pygame.key.get_pressed()
@@ -53,6 +58,8 @@ class Screamer:
         self.x += direction * SCREAMER_SPEED * dt
         self.x = max(0, min(self.x, WIDTH - self.rect.width))
         self.rect.x = round(self.x)
+        if self.shield_time > 0:
+            self.shield_time = max(0.0, self.shield_time - dt)
         for obj in objs:
             self.touch_objcet(obj)
     
@@ -63,6 +70,10 @@ class Screamer:
             if (damage == 0):
                 self.score += obj.get_score()
                 play_sound(GOOD_SOUND)
+                if obj.kind == "potion":
+                    self.shield_time = POTION_DURATION
+            elif self.shield_time > 0:
+                return
             else:
                 self.health = max(0, self.health - damage)
                 if self.health == 0:
@@ -71,7 +82,8 @@ class Screamer:
                     play_sound(PAIN_SOUND)
     
     def draw(self, screen):
-        screen.blit(self.image, self.rect)
+        image = self.shield_image if self.shield_time > 0 else self.image
+        screen.blit(image, self.rect)
 
 
 class FallingObject:
