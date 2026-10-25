@@ -53,7 +53,7 @@ BACK_BUTTON = ("quit", 467, 540, 347, 148)
 
 # Rules screen
 RULES_TITLE = "Rules"
-RULES_TEXT_SIZE = 26
+RULES_TEXT_SIZE = 20
 
 # Leaderboard screen
 LEADERBOARD_TITLE = "Leaderboard"
