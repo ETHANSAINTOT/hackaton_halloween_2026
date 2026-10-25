@@ -82,6 +82,10 @@ FALLING_OBJECTS = [
 ]
 # Seconds of invincibility given by the potion
 POTION_DURATION = 3.0
+# From this level on, ghosts drift side to side in a sine wave
+SWAY_LEVEL = 3
+SWAY_AMPLITUDE = 80
+SWAY_SPEED = 2
 SPAWN_DELAY_MIN = 0.5
 SPAWN_DELAY_MAX = 1.5
 FALL_SPEED_MIN = 150

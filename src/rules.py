@@ -11,7 +11,8 @@ from ui import run_text_screen
 RULES_TEXT = (
     "You control a screamer moving left and right with the LEFT and RIGHT arrow keys only.\n"
     "Press P to pause the game.\n"
-    "Objects always fall straight down from random positions along the top of the window.\n"
+    "Objects fall straight down from random positions along the top of the window.\n"
+    "From level 3, ghosts start drifting side to side.\n"
     "\n"
     "• Classic pumpkin: catch as many as you can to raise your score.\n"
     "• Carved pumpkin: you lose a life.\n"

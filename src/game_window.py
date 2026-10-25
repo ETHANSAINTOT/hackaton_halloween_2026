@@ -7,6 +7,7 @@
 
 import pygame
 import random
+import math
 import os
 
 from constants import WIDTH, HEIGHT, ASSETS_DIR, GROUND_Y, GOOD_SOUND, PAIN_SOUND
@@ -14,6 +15,7 @@ from constants import SCREAMER_SIZE, SCREAMER_SPEED, OBJECT_SIZE, FALLING_OBJECT
 from constants import SPAWN_DELAY_MIN, SPAWN_DELAY_MAX, FALL_SPEED_MIN, FALL_SPEED_MAX
 from constants import SCORE_PER_LEVEL, MAX_LEVEL, SPAWN_DELAY_STEP, FALL_SPEED_STEP
 from constants import POTION_DURATION
+from constants import SWAY_LEVEL, SWAY_AMPLITUDE, SWAY_SPEED
 from constants import GAME_QUIT_BUTTON, TOOLTIP_TEXT_SIZE, GAME_MUSIC, SCREAM_SOUND, GAME_OVER_PLAY_BUTTON
 from constants import TEXT_FONT, TEXT_COLOR, PANEL_COLOR, TITLE_COLOR, TITLE_OUTLINE_COLOR
 from ui import load_background, Button, ButtonGroup, render_tooltip, render_outlined_text, play_music, play_sound
@@ -101,6 +103,9 @@ class FallingObject:
             FALL_SPEED_MIN + FALL_SPEED_STEP * (level - 1),
             FALL_SPEED_MAX + FALL_SPEED_STEP * (level - 1)
         )
+        # From SWAY_LEVEL on, ghosts drift side to side in a sine wave
+        self.sway_amplitude = SWAY_AMPLITUDE if (kind == "boo" and level >= SWAY_LEVEL) else 0
+        self.sway_phase = 0.0
     def get_damage(self):
         return self.damage
     def get_score(self):
@@ -108,6 +113,15 @@ class FallingObject:
     def update(self, dt):
         self.y += self.speed * dt
         self.rect.y = round(self.y)
+        if self.sway_amplitude > 0:
+            self.sway_phase += SWAY_SPEED * dt
+            self.rect.x = max(
+                0,
+                min(
+                    self.x + int(self.sway_amplitude * math.sin(self.sway_phase)),
+                    WIDTH - OBJECT_SIZE
+                )
+            )
     def set_destroy(self):
         self.destroyed = True
     def on_destroy(self):
