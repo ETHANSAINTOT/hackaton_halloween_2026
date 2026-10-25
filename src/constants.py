@@ -65,6 +65,7 @@ GROUND_Y = HEIGHT - 20
 SCREAMER_SIZE = (120, 180)
 # Speeds are in pixels per second, delays in seconds
 SCREAMER_SPEED = 600
+SCREAMER_HEALTH = 5
 OBJECT_SIZE = 64
 # (kind, image, weight): the bigger the weight, the more often the object falls
 FALLING_OBJECTS = [
