@@ -46,6 +46,14 @@ def play_music(path):
     except pygame.error as error:
         print(f"Cannot play the music: {error}")
 
+def play_sound(path):
+    try:
+        sound = pygame.mixer.Sound(path)
+        sound.set_volume(MUSIC_VOLUME)
+        sound.play()
+    except pygame.error as error:
+        print(f"Cannot play the sound effect: {error}")
+
 
 # Only change the cursor when needed, it is shared by every screen
 def set_cursor(cursor):

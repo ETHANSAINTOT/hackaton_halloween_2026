@@ -30,6 +30,7 @@ TITLE_OUTLINE = 4
 # Menu music is played on the main menu, rules and leaderboard, game music during the game
 MENU_MUSIC = os.path.join(ASSETS_DIR, "music", "spooky_halloween.mp3")
 GAME_MUSIC = os.path.join(ASSETS_DIR, "music", "spooky_scary_skeleton.mp3")
+SCREAM_SOUND = os.path.join(ASSETS_DIR, "music", "scream.mp3")
 # Between 0.0 (mute) and 1.0 (max)
 MUSIC_VOLUME = 0.5
 
@@ -67,11 +68,11 @@ SCREAMER_SIZE = (120, 180)
 SCREAMER_SPEED = 600
 SCREAMER_HEALTH = 5
 OBJECT_SIZE = 64
-# (kind, image, weight): the bigger the weight, the more often the object falls
+# (kind, image, weight, damage): the bigger the weight, the more often the object falls
 FALLING_OBJECTS = [
-    ("pumpkin", "pumpkin.png", 6),
-    ("pumpkin_carved", "pumpkin_carved.png", 3),
-    ("boo", "boo.png", 1),
+    ("pumpkin", "pumpkin.png", 6 , 0),
+    ("pumpkin_carved", "pumpkin_carved.png", 3, 1),
+    ("boo", "boo.png", 1, 5),
 ]
 SPAWN_DELAY_MIN = 0.5
 SPAWN_DELAY_MAX = 1.5
@@ -79,4 +80,5 @@ FALL_SPEED_MIN = 150
 FALL_SPEED_MAX = 400
 # Same ratio as the image (453x193), in the top right corner
 GAME_QUIT_BUTTON = ("quit", 1085, 15, 180, 77)
+GAME_OVER_PLAY_BUTTON = ("play", WIDTH // 2 - 90, HEIGHT - 120, 180, 77)
 TOOLTIP_TEXT_SIZE = 20

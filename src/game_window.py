@@ -9,11 +9,11 @@ import pygame
 import random
 import os
 
-from constants import WIDTH, ASSETS_DIR, GROUND_Y
+from constants import WIDTH, HEIGHT, ASSETS_DIR, GROUND_Y
 from constants import SCREAMER_SIZE, SCREAMER_SPEED, OBJECT_SIZE, FALLING_OBJECTS, SCREAMER_HEALTH
 from constants import SPAWN_DELAY_MIN, SPAWN_DELAY_MAX, FALL_SPEED_MIN, FALL_SPEED_MAX
-from constants import GAME_QUIT_BUTTON, TOOLTIP_TEXT_SIZE, GAME_MUSIC
-from ui import load_background, Button, ButtonGroup, render_tooltip, play_music
+from constants import GAME_QUIT_BUTTON, TOOLTIP_TEXT_SIZE, GAME_MUSIC, SCREAM_SOUND, GAME_OVER_PLAY_BUTTON
+from ui import load_background, Button, ButtonGroup, render_tooltip, play_music, play_sound
 
 QUIT_WARNING = "You will go back to the main menu and lose all your progress!"
 
@@ -33,6 +33,7 @@ class Screamer:
         self.rect = self.image.get_rect(midbottom=(WIDTH // 2, GROUND_Y))
         self.x = float(self.rect.x)
         self.y = float(self.rect.y)
+        self.score = 0
 
     def update(self, dt, objs):
         keys = pygame.key.get_pressed()
@@ -46,24 +47,31 @@ class Screamer:
     def touch_objcet(self, obj):
         if self.rect.colliderect(obj.rect):
             obj.set_destroy()
-           
-        
-
+            damage = obj.get_damage()
+            if (damage == 0):
+                self.score += 1
+            else:
+                self.health = max(0, self.health - damage)
+                if self.health == 0:
+                    play_sound(SCREAM_SOUND)
+    
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
 
 class FallingObject:
-    def __init__(self, kind, image):
+    def __init__(self, kind, image, damage):
         self.destroyed = False
         self.kind = kind
+        self.damage = damage
         self.image = image
         # Starts just above the top edge of the window
         self.x = random.randint(0, WIDTH - OBJECT_SIZE)
         self.rect = image.get_rect(bottomleft=(self.x, 0))
         self.y = float(self.rect.y)
         self.speed = random.uniform(FALL_SPEED_MIN, FALL_SPEED_MAX)
-
+    def get_damage(self):
+        return self.damage
     def update(self, dt):
         self.y += self.speed * dt
         self.rect.y = round(self.y)
@@ -79,52 +87,112 @@ class FallingObject:
 
 
 def spawn_object(sprites):
-    kinds = [kind for kind, filename, weight in FALLING_OBJECTS]
-    weights = [weight for kind, filename, weight in FALLING_OBJECTS]
-    kind = random.choices(kinds, weights)[0]
-    return FallingObject(kind, sprites[kind])
+    kind, filename, weight, damage = random.choices(
+        FALLING_OBJECTS,
+        weights=[weight for kind, filename, weight, damage in FALLING_OBJECTS],
+        k=1
+    )[0]
+    return FallingObject(kind, sprites[kind], damage)
 
+def draw_stats(screen, screamer):
+    font = pygame.font.Font(None, 32)
 
-# Returns True to go back to the menu (Escape or quit button), False if the window was closed
-def run_game(screen):
-    background = load_background()
-    screamer = Screamer()
-    sprites = {}
-    for kind, filename, weight in FALLING_OBJECTS:
-        sprites[kind] = load_sprite(filename, (OBJECT_SIZE, OBJECT_SIZE), False)
-    objects = []
-    spawn_timer = random.uniform(SPAWN_DELAY_MIN, SPAWN_DELAY_MAX)
-    quit_button = Button(*GAME_QUIT_BUTTON)
-    buttons = ButtonGroup([quit_button])
-    # The warning is shown under the quit button while it is hovered
-    tooltip = render_tooltip(QUIT_WARNING, TOOLTIP_TEXT_SIZE)
-    tooltip_rect = tooltip.get_rect(topright=(quit_button.rect.right, quit_button.rect.bottom + 8))
-    play_music(GAME_MUSIC)
+    health_text = font.render(
+        f"Health : {screamer.health}",
+        True,
+        (255, 255, 255)
+    )
+    score_text = font.render(
+        f"Score : {screamer.score}",
+        True,
+        (255, 255, 255)
+    )
+
+    screen.blit(health_text, (10, 10))
+    screen.blit(score_text, (10, 45))
+
+def show_game_over(screen):
+    image = load_sprite("true_screamer.png", (1920, 1080), True)
+    image_rect = image.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 80))
+
+    play_button = Button(*GAME_OVER_PLAY_BUTTON)
+    buttons = ButtonGroup([play_button])
+
     clock = pygame.time.Clock()
 
     while True:
-        # Time since the last frame in seconds, capped to avoid big jumps
-        dt = min(clock.tick(60) / 1000, 0.05)
+        clock.tick(60)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                return True
+                return None
             if buttons.handle_event(event):
                 return True
-        screamer.update(dt, objects)
-        spawn_timer -= dt
-        if spawn_timer <= 0:
-            objects.append(spawn_object(sprites))
-            spawn_timer += random.uniform(SPAWN_DELAY_MIN, SPAWN_DELAY_MAX)
-        for obj in objects:
-            obj.update(dt)
-        objects = [obj for obj in objects if (not obj.on_ground() and not obj.on_destroy())]
-        screen.blit(background, (0, 0))
-        screamer.draw(screen)
-        for obj in objects:
-            obj.draw(screen)
+
+        screen.fill((0, 0, 0))
+        screen.blit(image, image_rect)
         buttons.draw(screen)
-        if buttons.get_button_at(pygame.mouse.get_pos()):
-            screen.blit(tooltip, tooltip_rect)
         pygame.display.flip()
+
+# Returns True to go back to the menu (Escape or quit button), False if the window was closed
+def run_game(screen):
+    while True:
+        background = load_background()
+        screamer = Screamer()
+        sprites = {}
+        for kind, filename, weight, damage in FALLING_OBJECTS:
+            sprites[kind] = load_sprite(
+                filename,
+                (OBJECT_SIZE, OBJECT_SIZE),
+                False
+            )
+        objects = []
+        spawn_timer = random.uniform(SPAWN_DELAY_MIN, SPAWN_DELAY_MAX)
+        quit_button = Button(*GAME_QUIT_BUTTON)
+        buttons = ButtonGroup([quit_button])
+        tooltip = render_tooltip(QUIT_WARNING, TOOLTIP_TEXT_SIZE)
+        tooltip_rect = tooltip.get_rect(
+            topright=(quit_button.rect.right, quit_button.rect.bottom + 8)
+        )
+        play_music(GAME_MUSIC)
+        clock = pygame.time.Clock()
+        while screamer.health > 0:
+            dt = min(clock.tick(60) / 1000, 0.05)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return False
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    return True
+                if buttons.handle_event(event):
+                    return True
+            screamer.update(dt, objects)
+            spawn_timer -= dt
+            if spawn_timer <= 0:
+                objects.append(spawn_object(sprites))
+                spawn_timer += random.uniform(
+                    SPAWN_DELAY_MIN,
+                    SPAWN_DELAY_MAX
+                )
+            for obj in objects:
+                obj.update(dt)
+            objects = [
+                obj for obj in objects
+                if not obj.on_ground() and not obj.on_destroy()
+            ]
+            screen.blit(background, (0, 0))
+            screamer.draw(screen)
+            for obj in objects:
+                obj.draw(screen)
+            buttons.draw(screen)
+            draw_stats(screen, screamer)
+            if buttons.get_button_at(pygame.mouse.get_pos()):
+                screen.blit(tooltip, tooltip_rect)
+            pygame.display.flip()
+        result = show_game_over(screen)
+        if result is True:
+            continue  # Nouvelle partie : tout est réinitialisé.
+        if result is False:
+            return False
+        return True  # Retour au menu.
